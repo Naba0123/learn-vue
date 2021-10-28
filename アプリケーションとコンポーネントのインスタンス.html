@@ -7,10 +7,40 @@
 <body>
 <script src="./vue.global.js"></script>
 
-
+<div id="app"></div>
 
 <script lang="js">
+    // レンダリングの起点
+    const RootComponent = {
+        // data は公開されるデータ
+        data() {
+            return {count: 4}
+        },
+        // インスタンス作成時にコードを実行するために使用
+        created() {  // アロー関数は使わない！thisがずれる
+            // `this` は vm インスタンスを指す
+            console.log('count is: ' + this.count)  // count is: 4
+        }
 
+    }
+
+    const app = Vue.createApp(RootComponent)  // だいたいチェーンできる
+    // .component('SearchInput', SearchInputComponent)
+    // .directive('focus', FocusDirective)
+    // .use(LocalePlugin)
+
+    // DOM にマウント
+    // ルートコンポーネントのインスタンスを返す
+    const vm = app.mount('#app')  // ViewModel の略
+    console.log(vm);
+
+    /**
+     * アプリケーションAPIリファレンス
+     * https://v3.ja.vuejs.org/api/application-api.html
+     *
+     * ライフサイクルダイアグラム
+     * https://v3.ja.vuejs.org/guide/instance.html#%E3%83%A9%E3%82%A4%E3%83%95%E3%82%B5%E3%82%A4%E3%82%AF%E3%83%AB%E3%82%BF%E3%82%99%E3%82%A4%E3%82%A2%E3%82%AF%E3%82%99%E3%83%A9%E3%83%A0
+     */
 
 
 </script>
