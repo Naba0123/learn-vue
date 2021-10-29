@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="./vue.global.js"></script>
+
+<!--
+  テンプレート式内でグローバルオブジェクトにアクセスしてはいけない
+  例外として Math や Date などのみアクセスできる
+  https://github.com/vuejs/vue-next/blob/master/packages/shared/src/globalsWhitelist.ts#L3
+-->
+
+<span>このメッセージは変更されます: {{ msg }}</span>
+<span v-once>このメッセージは変更されません: {{ msg }}</span>
+
+<!-- rawHtml を生のHTMLで描画 -->
+<p>Using v-html directive: <span v-html="rawHtml"></span></p>
+
+<!--
+ mustache 記法 https://qiita.com/sengok/items/1d958348215647a5eaf0 は属性には使えない
+ attribute には v-bind で紐付ける
+ null や undefined が渡された場合は属性に値は入らない
+-->
+<div v-bind:id="dynamicId"></div>
+<!-- 属性が存在している真偽値を渡す際はこのように渡す。値が空のときも渡される -->
+<button v-bind:disabled="isDisabled"></button>
+<!-- テンプレートには JavaScript を記載可能 | 文はダメ -->
+{{ message.split('').reverse().join('') }}
+
+<!-- v- がディレクティブ -->
+<div v-if="seen"></div>
+<div v-on:click="doSomething"></div>  <!-- イベント名を渡す -->
+<!--
+ 動的ディレクティブ引数 | attributeName が href なら v-bind:href になる
+ string 以外を渡すと警告を出しながら string に評価される
+ null を渡すと要素が消える
+ 動的引数のキー名に大文字は避ける→強制的に小文字に変換されるため
+-->
+<a v-bind:[attributeName]="url"> ... </a>
+<!-- 修飾子 | .prevent は event.preventDefault() を呼ぶという意味 -->
+<form v-on:submit.prevent="onSubmit">...</form>
+
+<!-- v-bind 省略記法 -->
+<a v-bind:href="url"></a>
+<a :href="url"></a>
+<a :[key]="url"></a>
+<!-- v-on 省略記法 -->
+<a v-on:click="doSomething"></a>
+<a @click="doSomething"></a>
+<a @[event]="doSomething"></a>
+
+
+<script lang="js">
+
+
+</script>
+
+</body>
+</html>
