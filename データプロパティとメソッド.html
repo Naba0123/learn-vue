@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="./vue.global.js"></script>
+<script src="https://unpkg.com/lodash@4.17.20/lodash.min.js"></script>
+
+
+<div id="app">{{ count }}
+    <button @click="increment">Up vote</button>
+    <!-- 以下のような形でメソッドを指定することも可能 -->
+<!--    <span :title="toTitleDate(date)">-->
+<!--        {{ formatDate(date) }}-->
+<!--    </span>-->
+    <save-button></save-button>
+</div>
+
+<script lang="js">
+
+    const app = Vue.createApp({
+        data() {
+            return {
+                count: 4
+            }
+        },
+        methods: {
+            increment() {
+                this.count++
+            }
+        }
+    })
+
+    app.component('save-button', {
+        created() {
+            // Lodash による Debounce
+            // https://iwb.jp/javascript-throttle-debounce-event-thinning-process/
+            // debounce イベントを呼び出し後、次のイベントまで指定した時間が経過するまではイベントを発生させない処理。
+            //          呼び出し待ち中に再度イベントが呼び出されたら、時間をリセットする
+            // throttle イベントを呼び出し後、指定した時間が経過するまでは次のイベントを発生させない処理。
+            this.debouncedClick = _.debounce(this.click, 500)
+        },
+        unmounted() {
+            this.debouncedClick.cancel()
+        },
+        methods: {
+            click() {
+                // クリックイベント用関数
+                console.log(1);
+            },
+        },
+        template: `
+            <button @click="debouncedClick">
+              Save
+            </button>
+        `
+    })
+
+    const vm = app.mount('#app')
+
+    // Vue は自身のビルドインAPIのプレフィックスに$を、内部プロパティのために_を予約している
+    console.log(vm.$data.count)  // 4
+    console.log(vm.count)  // 4
+
+    vm.count = 5  // みんな 5 になる
+
+    vm.increment();  // みんな 6 になる
+
+
+
+
+</script>
+
+</body>
+</html>
