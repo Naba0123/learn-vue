@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="./vue.global.js"></script>
+
+<!-- active がつくかどうかは isActive で変わる -->
+<div id="class-toggle">
+    <div :class="classObject"></div>
+    <div
+            :class="{ active: isActive, 'text-danger': hasError }"
+            class="static"
+    ></div>
+    <!-- isActive 時のみ activeClass が入る -->
+    <div :class="[isActive ? activeClass : '', errorClass]"></div>
+
+    <div :style="{ color: activeColor, fontSize: fontSize + 'px' }"></div>
+    <div :style="styleObject"></div>
+    <div :style="[baseStyles, overridingStyles]">a</div>  <!-- color: yellow; background-color: red; -->
+
+    <!-- 配列内でブラウザがサポートしている最後の値だけを描画する -->
+    <div :style="{ display: ['-webkit-box', '-ms-flexbox', 'flex'] }"></div> <!-- Chrome で開いたら flex だった -->
+
+</div>
+
+<!-- TODO: https://v3.ja.vuejs.org/guide/class-and-style.html#%E3%82%B3%E3%83%B3%E3%83%9B%E3%82%9A%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88%E3%81%AB%E3%81%8A%E3%81%84%E3%81%A6 -->
+
+
+<script lang="js">
+
+    Vue.createApp({
+        data() {
+            return {
+                isActive: true,
+                hasError: false,
+                error: {
+                    type: 'fatal'
+                },
+                activeClass: 'active',
+                errorClass: 'text-danger',
+
+                activeColor: 'blue',
+                fontSize: 30,
+            }
+        },
+        computed: {
+            classObject() {
+                return {
+                    active: this.isActive && !this.error,
+                    'text-danger': this.error && this.error.type === 'fatal'
+                }
+            },
+            styleObject() {
+                return {
+                    color: 'blue',
+                    fontSize: '13px',
+                }
+            },
+            baseStyles() {
+                return {
+                    color: 'blue',
+                    backgroundColor: 'red'
+                }
+            },
+            overridingStyles() {
+                return {
+                    color: 'yellow'
+                }
+            }
+        }
+    }).mount('#class-toggle')
+
+</script>
+
+</body>
+</html>
