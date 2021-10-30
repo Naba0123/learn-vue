@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="./vue.global.js"></script>
+
+<div id="app">
+
+    <!-- v-if と v-for は同時に使わない。v-if が先に評価される -->
+    <h1 v-if="awesome">Vue is awesome!</h1>
+    <h1 v-else-if="hoge === 'hoge'">Vue is hoge!</h1>
+    <h1 v-else>Oh no 😥</h1>
+
+    <!-- v-show の場合は、false のとき display: none になる -->
+    <!-- こちらの方が切り替えコストが低い。頻繁に切り替える場合は v-show を使う -->
+    <h1 v-show="ok">Hello!</h1>
+
+</div>
+
+<script lang="js">
+
+    Vue.createApp({
+        data() {
+            return {
+                awesome: false,
+                hoge: 'hoge',
+                ok: false,
+            }
+        }
+    }).mount('#app')
+
+</script>
+
+</body>
+</html>
