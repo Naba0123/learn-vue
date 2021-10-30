@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+
+
+<div id="basic-event">
+    <button @click="counter += 1">Add + 1</button>
+    <p>The button above has been clicked {{ counter }} times.</p>
+</div>
+
+<div id="event-with-method">
+    <button @click="greet">Greet</button>
+</div>
+
+<div id="inline-handler">
+    <!-- 複数のメソッドをイベントに登録できる -->
+    <button @click="say('hi'), say('hi')">Say hi</button>
+    <button @click="say('what', $event)">Say what</button>
+</div>
+
+<!--
+イベント修飾子
+.stop
+.prevent
+.capture
+.self
+.once
+.passive
+-->
+<!-- https://qiita.com/hosomichi/items/49500fea5fdf43f59c58 -->
+<!-- クリックイベントの伝搬が止まる -->
+<a @click.stop="doThis"></a>
+<!-- .でつなげることができる -->
+<a @click.stop.prevent="doThat"></a>
+<!-- 値なしでも可能 -->
+<form @submit.prevent></form>
+<!-- イベントリスナーの追加はキャプチャもーとで行う -->
+<!-- このdivの内部のイベントが発火する場合、それよりも前にここが呼ばれる -->
+<div @click.capture="doThis"></div>
+<!-- event.target が要素自身のときだけ呼ばれる。つまりターゲットフェーズのときのみ -->
+<div @click.self="doThat"></div>
+
+<!-- 順番が大事。これは、全てのクリックイベントを防ぐ -->
+<div @click.prevent.self></div>
+<!-- これは自身のクリックイベントを防ぐだけ -->
+<div @click.self.prevent></div>
+
+<!-- `onScroll` が `event.preventDefault()` を含んでいたとしても -->
+<!-- スクロールイベントのデフォルトの挙動(つまりスクロール)は -->
+<!-- イベントの完了を待つことなくただちに発生するようになります -->
+<!-- .passive はイベントのデフォルトの挙動を妨げないことをブラウザに伝達する -->
+<div @scroll.passive="onScroll">...</div>
+
+<!-- https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values -->
+<!-- ケバブケースに変換することで修飾子として使用可能 -->
+<!-- 以下のキーコードのエイリアスがある
+.enter
+.tab
+.delete ("Delete" と "Backspace" キー両方をキャプチャします)
+.esc
+.space
+.up
+.down
+.left
+.right
+-->
+<input @keyup.page-down="onPageDown"/>
+
+
+<!--
+修飾子キー
+通常のキーとは違い、イベント発生時にそれぞれのキーが押されている必要がある。
+@keyup.ctrl は、Ctrl を離したとしても何も起きない
+.ctrl
+.alt
+.shift
+.meta
+-->
+<!-- Alt + Enter -->
+<input @keyup.alt.enter="clear"/>
+<!-- Ctrl + Click -->
+<div @click.ctrl="doSomething">Do something</div>
+
+<!-- exact は、他にキーが押されていないことを保証する -->
+<button @click.ctrl.exact="onCtrlClick">A</button>
+<!-- これはシステム修飾子キーが押されていないことを保証する -->
+<button @click.exact="onClick">A</button>
+
+<!--
+マウスボタンの修飾子
+.left
+.right
+.middle
+-->
+
+
+<script lang="js">
+
+    Vue.createApp({
+        data() {
+            return {
+                counter: 0
+            }
+        }
+    }).mount('#basic-event')
+
+    Vue.createApp({
+        data() {
+            return {
+                name: 'Vue.js'
+            }
+        },
+        methods: {
+            greet(event) {
+                alert('Hello ' + this.name + '!')
+                // `event` はネイティブの DOM イベント
+                if (event) {
+                    alert(event.target.tagName)
+                }
+            }
+        }
+    }).mount('#event-with-method')
+
+    Vue.createApp({
+        methods: {
+            say(message, event) {
+                // ネイティブイベント
+                if (event) {
+                    console.log(event)
+                    event.preventDefault()
+                }
+                alert(message)
+            }
+        }
+    }).mount('#inline-handler')
+
+</script>
+
+</body>
+</html>
