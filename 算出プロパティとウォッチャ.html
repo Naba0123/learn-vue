@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="./vue.global.js"></script>
+
+<div id="computed-basics">
+    <p>Has published books:</p>
+    <!-- これが算出プロパティ-->
+    <span>{{ publishedBooksMessage }}</span>
+    <!-- これはメソッド -->
+    <span>{{ nowTime() }}</span>
+</div>
+
+<div id="watch-example">
+    <p>
+        Ask a yes/no question:
+        <input v-model="question"/>
+    </p>
+    <p>{{ answer }}</p>
+    <img :src="img"/>
+</div>
+
+<script lang="js">
+
+    const vm = Vue.createApp({
+        data() {
+            return {
+                author: {
+                    name: 'Jone Doe',
+                    books: [
+                        'Vue 2 - Advanced Guide',
+                        'Vue 3 - Basic Guide',
+                        'Vue 4 - The Mystery'
+                    ]
+                },
+                firstName: '',
+                lastName: ''
+            }
+        },
+        computed: {
+            // 算出プロパティはリアクティブな依存関係に基づいてキャッシュされる
+            publishedBooksMessage() {
+                return this.author.books.length > 0 ? 'Yes' : 'No'
+            },
+            // getter, setter を個別に指定することも可能
+            fullName: {
+                get() {
+                    return this.firstName + ' ' + this.lastName
+                },
+                set(newValue) {
+                    const names = newValue.split(' ')
+                    this.firstName = names[0]
+                    this.lastName = names[names.length - 1]
+                }
+            }
+        },
+        methods: {
+            // 算出プロパティではなく、メソッドでも記載はできるが、
+            // メソッドは再レンダリングが起こるたびに常に関数を実行する
+            nowTime() {
+                return Date.now()
+            }
+        }
+    }).mount('#computed-basics')
+
+    vm.fullName = 'a b c'
+    console.log(vm.fullName)  // 'a c'
+
+</script>
+
+
+<!-- ajax ライブラリや汎用ユーティリティメソッドのコレクションなどの      -->
+<!-- 豊富なエコシステムがすでに存在するため、それらを再発明しないことで -->
+<!-- Vue のコアは小規模なまま保たれています。これは、使い慣れたものを  -->
+<!-- 自由に使うことができる、ということでもあります。                  -->
+<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+<script lang="js">
+
+    const watchExampleVM = Vue.createApp({
+        data() {
+            return {
+                question: '',
+                answer: 'Questions usually contain a question mark. ;-',
+                img: ''
+            }
+        },
+        watch: {
+            // question が変わるたびに、この関数が実行される
+            question(newQuestion, oldQuestion) {
+                if (newQuestion.indexOf('?') > -1) {
+                    this.getAnswer()
+                }
+            }
+        },
+        methods: {
+            getAnswer() {
+                this.answer = 'Thinking...'
+                this.img = ''
+                axios
+                    .get('https://yesno.wtf/api')
+                    .then(response => {
+                        this.answer = response.data.answer
+                        this.img = response.data.image
+                    })
+                    .catch(error => {
+                        this.answer = 'Error! Could not reach tha API. ' + error
+                    })
+            }
+        }
+    }).mount('#watch-example')
+
+</script>
+
+</body>
+</html>
