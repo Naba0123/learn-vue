@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+
+<div id="components-demo">
+    <button-counter></button-counter>
+    <button-counter></button-counter>
+    <button-counter></button-counter>
+</div>
+
+<div id="blog-post-demo">
+    <div :style="{ fontSize: postFontSize + 'em' }">
+        <blog-post v-for="post in posts" :key="post.id" :title="post.title"
+                   @enlarge-text="postFontSize += $event"></blog-post>
+
+        <br><br>
+
+        <!-- メソッドで渡す -->
+        <blog-post v-for="post in posts" :key="post.id" :title="post.title"
+                   @enlarge-text="onEnlargeText"></blog-post>
+
+    </div>
+
+    <br><br>
+
+    <!-- 以下２つは同じことを表す -->
+    <input v-model="searchText"/>
+    =
+    <input v-bind:value="searchText" v-on:input="searchText = $event.target.value"/>
+
+    <br><br>
+
+    <!-- コンポーネントでの使い方 -->
+    <custom-input :model-value="searchText" @update:model-value="searchText = $event"></custom-input>
+
+    <br><br>
+
+    <alert-box>
+        Something bad happened.
+    </alert-box>
+
+    <table>
+        <!-- HTML 内にテンプレートを書く場合、書くことができる要素に制限がある -->
+        <blog-post-row></blog-post-row><!-- これはエラー -->
+        <tr is="vue:blog-post-row"></tr><!-- こう書かないといけない -->
+    </table>
+</div>
+
+<br><br>
+
+<!-- タブ要素を動的に切り替えている -->
+<div id="dynamic-component-demo">
+    <button v-for="tab in tabs" :disabled="currentTab === tab" @click="currentTab = tab">{{ tab }}</button>
+    <component :is="currentTabComponent"></component>
+</div>
+
+<script lang="js">
+
+    Vue.createApp({})
+        // グローバル button-counter コンポーネントの定義
+        .component('button-counter', {
+            data() {
+                return {
+                    count: 0
+                }
+            },
+            template: `
+              <button @click="count++">
+              You clicked me {{ count }} times.
+              </button>
+            `
+        })
+        .mount('#components-demo')
+
+    Vue.createApp({
+        data() {
+            return {
+                posts: [
+                    {id: 1, title: 'My journey with Vue'},
+                    {id: 2, title: 'Blogging with Vue'},
+                    {id: 3, title: 'Why Vue is so fun'}
+                ],
+                postFontSize: 1,
+                searchText: ''
+            }
+        },
+        methods: {
+            onEnlargeText(enlargeAmount) {
+                this.postFontSize += enlargeAmount
+            }
+        }
+    })
+        .component('blog-post', {
+            props: ['title'],
+            emits: ['enlargeText'],  // 発行されたイベントを一覧する
+            template: `
+              <div class="blog-post">
+              <h4>{{ title }}</h4>
+              <!-- $emit 現在のインスタンスでイベントを発動します。追加の引数はリスナーのコールバック関数に渡されます。 -->
+              <!-- 第2引数で $event に渡せる -->
+              <button @click="$emit('enlargeText', 0.1)">
+                Enlarge text
+              </button>
+              </div>
+            `
+        })
+        // getter, setter で指定できる
+        .component('custom-input', {
+            props: ['modelValue'],
+            emits: ['update:modelValue'],
+            template: `
+              <input v-model="value">
+            `,
+            computed: {
+                value: {
+                    get() {
+                        return this.modelValue
+                    },
+                    set(value) {
+                        this.$emit('update:modelValue', value)
+                    }
+                }
+            }
+        })
+        // スロット機能
+        // https://v3.ja.vuejs.org/guide/component-slots.html#%E3%82%B9%E3%83%AD%E3%83%83%E3%83%88%E3%82%B3%E3%83%B3%E3%83%86%E3%83%B3%E3%83%84
+        .component('alert-box', {
+            template: `
+            <div class="demo-alert-box">
+                <strong>Error!</strong>
+                <slot></slot>
+            </div>
+        `
+        })
+        .mount('#blog-post-demo')
+
+    Vue.createApp({
+        data() {
+            return {
+                currentTab: 'Home',
+                tabs: ['Home', 'Posts', 'Archives']
+            }
+        },
+        computed: {
+            currentTabComponent() {
+                return 'tab-' + this.currentTab.toLowerCase()
+            }
+        }
+    })
+        .component('tab-home', {
+            template: `<div>Home Component</div>`
+        })
+        .component('tab-posts', {
+            template: `<div>Posts Component</div>`
+        })
+        .component('tab-archives', {
+            template: `<div>Archives Component</div>`
+        })
+        .mount('#dynamic-component-demo')
+
+</script>
+
+
+</body>
+</html>
