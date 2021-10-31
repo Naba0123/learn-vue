@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+
+<div id="app">
+
+    <!-- コンポーネントの属性に指定したものはそのまま描画される -->
+    <date-picker data-status="activated" @change="submitChange"></date-picker>
+    <date-picker2 @change="showChange"></date-picker2>
+
+</div>
+
+<script lang="js">
+
+    Vue
+        .createApp({
+            methods: {
+                showChange(event) {
+                    console.log(event.target.value)
+                },
+                submitChange(event) {
+                    console.log(event.target.value)
+                }
+            }
+        })
+        .component('date-picker', {
+            inheritAttrs: false,  // 呼び出し元で設定されている属性は引き継がれなくなる。$attrs には入ってる
+            template: `
+            <div class="date-picker">
+                <!-- 引き継ぎしなかった $attrs をここで呼び出せる -->
+                <!-- 複数コンポーネント定義されている場合 -->
+                <input type="datetime-local" v-bind="$attrs"/>
+            </div>
+        `,
+            created() {
+                // data-status などはここで取れる
+                console.log(this.$attrs)
+            }
+        })
+        .component('date-picker2', {
+            template: `
+            <select>
+                <option value="1">Yesterday</option>
+                <option value="2">Today</option>
+                <option value="3">Tomorrow</option>
+            </select>
+        `
+        })
+        .mount('#app')
+
+    // ルート要素が複数の場合、明示的に $attrs を書かないと warning が出る
+
+
+</script>
+
+
+</body>
+</html>
