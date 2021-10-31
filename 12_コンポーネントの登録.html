@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+
+
+<script lang="js">
+
+    const app = Vue.createApp({})
+
+    /**
+     * コンポーネント名
+     * ・すべて小文字
+     * ・ハイフンを含める（複数の単語をハイフンを用いて繋げる）
+     * のが定石（W3C rules)
+     * kebab-case と PascalCase のとちらでもOK、パスカルの場合は使う際にケバブでも呼べる
+     */
+    app.component('my-component-name', {})
+
+    /**
+     * ローカルコンポーネント
+     * ローカル登録は、サブコンポーネントで利用できない
+     */
+    const ComponentA = {}
+    const ComponentB = {
+        components: {
+            // こうすることで、Bの中でAが使えるようになる
+            'component-a': ComponentA
+        }
+    }
+
+    /**
+     * Babel, Webpack だとこのように書く
+     */
+    // export default {
+    //     components: {
+    //         ComponentA
+    //     }
+    // }
+
+    Vue.createApp({
+        components: {
+            // このキー名がカスタム要素の名前になる
+            'component-a': ComponentA,
+            'component-b': ComponentB,
+        }
+    })
+
+</script>
+
+
+</body>
+</html>
