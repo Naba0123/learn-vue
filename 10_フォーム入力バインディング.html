@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+
+<div id="app">
+    <input v-model="message" placeholder="edit me"/>
+    <p>Message is: {{ message }}</p>
+
+    <br><br>
+
+    <p style="white-space: pre-line">{{ multi_message }}</p>
+    <!-- textarea はカッコ内に入れても動きません。v-model を使用すること -->
+    <textarea v-model="multi_message"></textarea>
+
+    <br><br>
+
+    <input id="one-checkbox" v-model="checked" type="checkbox"/>
+    <!-- checkbox は true か false のどちらかになる -->
+    <label for="one-checkbox">{{ checked }}</label>
+
+    <br><br>
+
+    <input id="one-checkbox2" v-model="checked2" false-value="no" true-value="yes" type="checkbox"/>
+    <!-- checkbox2 は 'yes' か 'no' のどちらかになる -->
+    <label for="one-checkbox2">{{ checked2 }}</label>
+
+    <br><br>
+
+    <input id="multi-checkbox-jack" v-model="checkNames" type="checkbox" value="Jack"/>
+    <label for="multi-checkbox-jack">Jack</label>
+    <input id="multi-checkbox-john" v-model="checkNames" type="checkbox" value="John"/>
+    <label for="multi-checkbox-john">John</label>
+    <input id="multi-checkbox-mike" v-model="checkNames" type="checkbox" value="Mike"/>
+    <label for="multi-checkbox-mike">Mike</label>
+    <br>
+    <span>Checked names: {{ checkNames.sort() }}</span>
+
+    <br><br>
+
+    <input id="radio-one" v-model="picked" type="radio" value="One"/>
+    <label for="radio-one">One</label>
+    <input id="radio-two" v-model="picked" type="radio" v-bind:value="a"/><!-- value が Hoge になる -->
+    <label for="radio-two">Two</label>
+    <br>
+    <span>Picked: {{ picked }}</span>
+
+    <br><br>
+
+    <select v-model="selected">
+        <option disabled value="">Please select</option>
+        <option value="a">A</option><!-- value が指定されていたら優先される -->
+        <option>B</option>
+        <option :value="{ number: 123 }">C</option><!-- 選択されると vm.selected が {number: 123} になる -->
+    </select>
+    <br>
+    <span>Selected: {{ selected }}</span>
+
+    <br><br>
+
+    <select v-model="selectedMulti" multiple>
+        <option>A</option>
+        <option>B</option>
+        <option>C</option>
+    </select>
+    <br>
+    <span>Selected: {{ selectedMulti }}</span>
+
+    <br><br>
+
+    <select v-model="selectedDynamic">
+        <option disabled value="">Please Select</option>
+        <option v-for="op in options" :value="op.value">{{ op.text }}</option>
+    </select>
+    <br>
+    <span>Selected: {{ selectedDynamic }}</span>
+
+    <br><br>
+
+    <!-- input ではなく change タイミングで同期される -->
+    <input v-model.lazy="msg"/>
+
+    <br><br>
+
+    <!-- ユーザ入力を自動でnumberへキャストできる。parseFloatできない場合はそのままの値が返る -->
+    <input v-model.number="msgNumber" type="number"/>
+
+    <br><Br>
+
+    <!-- 空白を自動で取り除く -->
+    <input v-model.trim="msg"/>
+
+
+</div>
+
+<script lang="js">
+
+    const vm = Vue.createApp({
+        data() {
+            return {
+                a: 'Hoge',
+                message: '',
+                multi_message: '',
+                checked: true,
+                checked2: 'yes',
+                checkNames: [],
+                picked: '',
+                selected: '',
+                selectedMulti: [],
+                options: [
+                    {text: 'One', value: 'A'},
+                    {text: 'Two', value: 'B'},
+                    {text: 'Three', value: 'C'},
+                ],
+                selectedDynamic: '',
+                msg: '',
+                msgNumber: '',
+            }
+        }
+    }).mount('#app')
+
+</script>
+
+
+</body>
+</html>
