@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+
+<div id="app">
+    <!-- 文字列ではなくJavaScript の値だと伝えるためには、v-bind を使う必要がある -->
+    <blog-post :is-published="post.isPublished" :title="post.title"></blog-post>
+    <blog-post v-bind="post"></blog-post>
+    <!-- ↑2つは同じ意味。v-bind でまとめてオブジェクト指定ができる -->
+
+    <blog-post :author="{
+        name: 'Veronica',
+        company: 'Veridian Dynamics'
+    }"></blog-post>
+</div>
+
+<script lang="js">
+
+    Vue
+        .createApp({
+            data() {
+                return {
+                    post: {
+                        title: 'たいとる',
+                        isPublished: true
+                    }
+                }
+            }
+        })
+        .component('blog-post', {
+            props: {
+                /**
+                 * 使える型
+                 * String
+                 * Number
+                 * Boolean
+                 * Array
+                 * Object
+                 * Date
+                 * Function
+                 * Symbol
+                 */
+                // 型の定義
+                title: String,
+                subtitle: {type: String, default: 'A'},  // デフォルト値
+                likes: [Number, String],  // 複数の方の許容
+                isPublished: {type: Boolean, required: true},  // 必須
+                commentIds: Array,  // 配列、オブジェクトのデフォルト値は必ず（ファクトリ）関数で返す
+                author: {
+                    type: Object, default() {  // オブジェクトのデフォルト値
+                        return {message: 'hello'}
+                    }
+                },
+                category: {
+                    // バリデーター
+                    // コンポーネントのインスタンスが作成される前に実行されるので、dataやcomputedは使えない
+                    validator(value) {
+                        return ['common', 'info'].includes(value)
+                    }
+                },
+                callback: Function,
+                callback2: {
+                    type: Function,
+                    default() {  // これはファクトリ関数ではなくただのデフォルト値としての関数
+                        return 'Default function'
+                    }
+                },
+                contactsPromise: Promise,  // またはその他のコンストラクタ
+                initialCounter: Number,
+                // author2: Person  // 独自クラスも指定可能 new Person したものかどうか
+            },
+            data() {
+                return {
+                    // 親から子への渡し方（親の値を書き換えないように）
+                    counter: this.initialCounter
+                }
+            },
+            computed: {
+                // プロパティを、変換が必要な未加工の値として受け渡す
+                normalizedSize() {
+                    return this.size.trim().toLowerCase()
+                }
+            },
+            template: `
+              <span>title: {{ title }}</span>
+            `
+        })
+        .mount('#app')
+
+</script>
+
+
+</body>
+</html>
