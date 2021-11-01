@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+
+<div id="app">
+
+    <my-component @my-event="doSomething"></my-component>
+
+    <br><br>
+
+    <my-component v-model:first-name="hoge" v-model:title="hoge"></my-component>
+
+    <br><br>
+
+    <!-- v-model.修飾子  -> modelModifiers で確認できる -->
+    <component-b v-model.capitalize="myText"></component-b>
+    {{ myText }}
+
+    <!-- v-model:プロパティ名.修飾子 -> プロパティModifiers で確認できる -->
+    <component-b v-model:description.capitalize="myText"></component-b>
+
+</div>
+
+<script lang="js">
+
+    const componentA = {
+        props: {
+            title: String,
+            firstName: String,
+        },
+        methods: {
+            a() {
+                // キャメルケースでイベントを発行すると、親コンポーネントでケバブケースで呼べる
+                this.$emit('myEvent')
+            }
+        },
+        emits: ['update:title', 'update:firstName'],
+        // update:title を呼ぶことで同期できる
+        template: `
+          <input type="text" :value="title" @input="$emit('update:title', $event.target.value)">
+        `
+    }
+
+    const componentB = {
+        props: {
+            modelValue: String,
+            modelModifiers: {
+                default: () => ({})
+            },
+            description: String,
+            descriptionModifiers: {
+                default: () => ({})
+            }
+        },
+        emits: ['update:modelValue'],
+        methods: {
+            emitValue(e) {
+                let value = e.target.value
+                if (this.modelModifiers.capitalize) {
+                    value = value.charAt(0).toUpperCase() + value.slice(1)
+                }
+                this.$emit('update:modelValue', value)
+            }
+        },
+        template: `
+          <input type="text"
+                 :value="modelValue"
+                 @input="emitValue">
+        `,
+        created() {
+            console.log(this.modelModifiers, this.descriptionModifiers)
+        }
+    }
+
+    Vue
+        .createApp({
+            data() {
+                return {
+                    hoge: 'hogehoge!',
+                    myText: ''
+                }
+            },
+            components: {
+                'my-component': componentA,
+                'component-b': componentB
+            },
+            methods: {
+                doSomething() {
+                    console.log('something')
+                }
+            }
+        })
+        .component('custom-form-0', {
+            emits: ['inFocus', 'submit']  // ネイティブイベントの代わりにコンポーネントのイベントが使われる
+        })
+        .component('custom-form', {
+            emits: {
+                // no validation
+                click: null,
+
+                // validate submit event
+                submit: ({email, password}) => {
+                    if (email && password) {
+                        return true
+                    } else {
+                        console.warn('Invalid submit event payload!')
+                        return false
+                    }
+                },
+
+                methods: {
+                    submitForm(email, password) {
+                        // イベント発行
+                        this.$emit('submit', {email, password})
+                    }
+                }
+            }
+        })
+        .mount('#app')
+
+
+</script>
+
+
+</body>
+</html>
