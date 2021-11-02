@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+
+<div id="app">
+
+    <todo-button>
+        <other-component>
+            <!-- other-component 内の要素にはアクセスできない {{ a }} はエラーになる -->
+            <!-- なぜなら other-component 内で定義されるのではなく、other-component に渡されるから -->
+            Add todo {{ a }}
+        </other-component>
+    </todo-button>
+
+    <br><br>
+
+    <!-- フォールバックコンテンツ | デフォルトコンテンツ -->
+    <submit-buttom></submit-buttom>
+    <br>
+    <submit-buttom>Save</submit-buttom>
+
+    <!-- 名前付きスロット -->
+    <base-layout>
+        <template v-slot:header><!-- 省略形 #header -->
+            Header
+        </template>
+        <template v-slot:default><!-- 省略形 #default -->
+            main contents
+        </template>
+        <template v-slot:footer><!-- 省略形 #footer -->
+            footer
+        </template>
+    </base-layout>
+
+    <!-- 子コンポーネントから値を渡す -->
+    <todo-list>
+        <!-- v-slot 経由で子コンポーネントから値一覧を貰える -->
+        <template v-slot:default="slotProp"><!-- 省略 #default="slotProp" -->
+            Override: {{ slotProp.item }}
+        </template>
+    </todo-list>
+
+    <!-- ↑の省略形（slotがdefaultのみの場合）。基本的には template を使うべし -->
+    <todo-list v-slot:default="slotProp">
+        <!--        Override: {{ slotProp.item }}-->
+    </todo-list>
+
+    <!-- ↑のもっと省略形。default も省略できる。複数スロットがある場合は警告が出る -->
+    <todo-list v-slot="slotProp">
+        Override: {{ slotProp.item }}
+    </todo-list>
+
+    <!-- 分割代入で受け取ることもできる | 下記の例ではついでに to_do にリネームしてる -->
+    <todo-list v-slot="{ item: todo }">
+        Override: {{ todo }}
+    </todo-list>
+    <!-- フォールバック（デフォルト値） -->
+    <todo-list v-slot="{ notDefined = 'Placeholder' }">
+        Override: {{ notDefined }}
+    </todo-list>
+
+    <!-- 動的スロット名 -->
+    <todo-list v-slot:[dynamicSlotName]></todo-list>
+
+
+</div>
+
+<script lang="js">
+
+    Vue
+        .createApp({
+            data() {
+            }
+        })
+        .component('todo-button', {
+            template: `
+                <button>
+                    <!-- slotで中身を置き換えることができる -->
+                    <slot></slot>
+                </button>
+            `
+        })
+        .component('other-component', {
+            data() {
+                return {
+                    a: 'hoge'
+                }
+            },
+            template: `
+              <div class="otherComponent">
+              {{ a }}
+              <slot></slot>
+              </div>
+            `
+        })
+        .component('submit-buttom', {
+            template: `
+                <button type="submit">
+                    <slot>Submit</slot> <!-- Slot の中に書くとデフォルト値になる -->
+                </button>
+            `
+        })
+        .component('base-layout', {
+            template: `
+                <!-- 名前付きスロット -->
+                <div>
+                    <header>
+                        <slot name="header"></slot>
+                    </header>
+                    <main>
+                        <!-- name を指定しなかったら 'default' とつながる -->
+                        <slot></slot>
+                    </main>
+                    <footer>
+                        <slot name="footer"></slot>
+                    </footer>
+                </div>
+            `
+        })
+        .component('todo-list', {
+            data() {
+                return {
+                    items: ['Feed a cat', 'Buy milk']
+                }
+            },
+            template: `
+              <ul>
+              <li v-for="(item, index) in items">
+                <!-- 親スコープ側で v-slot:default="slotProp" で slotProp.item で取得できる -->
+                <slot :item="item">default: {{ item }}</slot>
+              </li>
+              </ul>
+            `
+        })
+        .mount('#app')
+
+</script>
+
+
+</body>
+</html>
