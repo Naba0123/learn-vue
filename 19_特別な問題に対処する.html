@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+
+<div id="app">
+    <terms-of-service></terms-of-service>
+
+</div>
+
+<script lang="js">
+
+    const app = Vue.createApp({})
+
+    app.component('terms-of-service', {
+        data() {
+            return {
+                hoge: 'hoge'
+            }
+        },
+        // 静的コンテンツが重いので、1度だけ評価、を矯正できる
+        template: `
+          <div v-once>
+          <h1>Terms of Service</h1>
+          ... a lot of static content {{ hoge }} ...
+          </div>
+          <button @click="forceUpdateMyComponent">Force Update</button>
+          <button @click="hoge = 'fuga'">hoge to fuga</button>
+        `,
+        methods: {
+            // 強制的に再描画する
+            forceUpdateMyComponent() {
+                this.$forceUpdate()  // v-once にはきかない
+                alert('Done')
+            }
+        }
+    })
+
+    app.mount('#app')
+
+</script>
+
+
+</body>
+</html>
