@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+
+<div id="app">
+    <base-input></base-input>
+
+</div>
+
+<script lang="js">
+
+    const app = Vue.createApp({})
+
+    app.component('base-input', {
+        template: `
+          <input ref="targetInput"/>
+        `,
+        methods: {
+            focusInput() {
+                <!-- 特定の要素を選択できる -->
+                this.$refs.targetInput.focus()
+            }
+        },
+        mounted() {
+            this.focusInput()
+        }
+    })
+
+    app.mount('#app')
+
+</script>
+
+
+</body>
+</html>
