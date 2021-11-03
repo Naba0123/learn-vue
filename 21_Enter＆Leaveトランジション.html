@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+
+<link
+        href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.0/animate.min.css"
+        rel="stylesheet"
+        type="text/css"
+/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.8.0/gsap.min.js"></script>
+
+
+<div id="demo0">
+    <transition name="fade">
+        <button :key="docState">
+            {{ buttonMessage }}
+        </button>
+    </transition>
+</div>
+
+<br><br>
+
+<div id="demo">
+    <button @click="show = !show">
+        Toggle
+    </button>
+
+    <!-- この fade がキーになっている -->
+    <transition name="fade">
+        <p v-if="show">hello</p>
+    </transition>
+</div>
+
+<br><br>
+
+<div id="demo2">
+    <button @click="show = !show">
+        Toggle render
+    </button>
+
+    <transition name="slide-fade">
+        <p v-if="show">hello</p>
+    </transition>
+</div>
+
+<br><br>
+
+<div id="demo3">
+    <button @click="show = !show">Toggle show</button>
+    <transition appear name="bounce"><!-- appear をつけるとノードの初期描画時に初回実行する -->
+        <p v-if="show">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris facilisis
+            enim libero, at lacinia diam fermentum id. Pellentesque habitant morbi
+            tristique senectus et netus.
+        </p>
+    </transition>
+</div>
+
+<br><br>
+
+<div id="demo4">
+    <button @click="show = !show">
+        Toggle render
+    </button>
+
+    <!-- 外部ライブラリとの連携などで、カスタムトランジションクラスを指定可能 -->
+    <transition
+            enter-active-class="animate__animated animate__tada"
+            leave-active-class="animate__animated animate__bounceOutRight"
+            name="custom-classes-transition"
+    >
+        <p v-if="show">hello</p>
+    </transition>
+</div>
+
+<!-- 明示的にトランジションの時間を指定することができる（ミリ秒） -->
+<transition :duration="1000">...</transition>
+<transition :duration="{ enter: 500, leave: 800 }">...</transition>
+
+<!-- JavaScript フック -->
+<transition
+        :css="false"
+        @enter="enter"
+        @leave="leave"
+        @before-enter="beforeEnter"
+        @after-enter="afterEnter"
+        @enter-cancelled="enterCancelled"
+        @before-leave="beforeLeave"
+        @after-leave="afterLeave"
+        @leave-cancelled="leaveCancelled"
+>
+    <!-- ... -->
+</transition>
+
+<br><br>
+
+<div id="demo5">
+    <button @click="show = !show">
+        Toggle
+    </button>
+
+    <transition
+            :css="false"
+            @enter="enter"
+            @leave="leave"
+            @before-enter="beforeEnter"
+    >
+        <p v-if="show">
+            Demo
+        </p>
+    </transition>
+
+</div>
+
+<br><br>
+
+<div id="demo6">
+    <!-- mode="out-in" を指定することで、leave が終わってから enter が始まるようになる（ボタンが2つ表示されなくなる） -->
+    <transition mode="out-in" name="no-mode-fade">
+        <button v-if="on" key="on" @click="on = false">
+            on
+        </button>
+        <button v-else key="off" @click="on = true">
+            off
+        </button>
+    </transition>
+
+    <!-- コンポーネント間のトランジションに関しても、動的コンポーネントでラップをするだけでOK -->
+    <transition mode="out-in" name="component-fade">
+        <component :is="view"></component>
+    </transition>
+</div>
+
+
+<style>
+    /* enter の活性状態。トランジションに入るフェーズ中 */
+    .fade-enter-active,
+    .fade-leave-active {
+        transition: opacity 0.5s ease;
+    }
+
+    /*
+    v-enter-to: enter の終了状態。v-enter-from が削除されるのと同時。そのあと削除される
+    v-leave-from: leave の開始状態。直ちに追加され、すぐに削除
+     */
+    .fade-enter-to,
+    .fade-leave-from {
+        /*font-size: 2rem;*/
+    }
+
+    /* enter の開始状態、leave の終了状態 */
+    .fade-enter-from,
+    .fade-leave-to {
+        opacity: 0;
+        /*font-size: 1rem;*/
+    }
+
+
+    /* Enter および leave アニメーションは、それぞれ異なる間隔やタイミング関数を利用できる*/
+    .slide-fade-enter-active {
+        transition: all 0.3s ease-out;
+    }
+
+    .slide-fade-leave-active {
+        transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
+    }
+
+    .slide-fade-enter-from,
+    .slide-fade-leave-to {
+        transform: translateX(20px);
+        opacity: 0;
+    }
+
+    /* CSSアニメーションでは、v-enter-from がすぐには削除されないが animationend イベント時には削除される */
+    .bounce-enter-active {
+        animation: bounce-in 0.5s;
+    }
+
+    .bounce-leave-active {
+        animation: bounce-in 0.5s reverse;
+    }
+
+    @keyframes bounce-in {
+        0% {
+            transform: scale(0);
+        }
+        50% {
+            transform: scale(1.25);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .no-mode-fade-enter-active, .no-mode-fade-leave-active {
+        transition: opacity .5s
+    }
+
+    .no-mode-fade-enter-from, .no-mode-fade-leave-to {
+        opacity: 0
+    }
+
+    button {
+        background: #05ae7f;
+        border-radius: 4px;
+        display: inline-block;
+        border: none;
+        padding: 0.5rem 0.75rem;
+        text-decoration: none;
+        color: #ffffff;
+        font-family: sans-serif;
+        font-size: 1rem;
+        cursor: pointer;
+        text-align: center;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+    }
+</style>
+
+<script lang="js">
+
+    Vue.createApp({
+        data() {
+            return {
+                docState: 'saved'
+            }
+        },
+        computed: {
+            buttonMessage() {
+                switch (this.docState) {
+                    case 'saved':
+                        return 'Edit'
+                    case 'edited':
+                        return 'Save'
+                    case 'editing':
+                        return 'Cancel'
+                }
+            }
+        }
+    }).mount('#demo0')
+
+    Vue.createApp({
+        data() {
+            return {
+                show: true
+            }
+        }
+    }).mount('#demo')
+
+    Vue.createApp({
+        data() {
+            return {
+                show: true
+            }
+        }
+    }).mount('#demo2')
+
+    Vue.createApp({
+        data() {
+            return {
+                show: true
+            }
+        }
+    }).mount('#demo3')
+
+    Vue.createApp({
+        data() {
+            return {
+                show: true
+            }
+        },
+        methods: {
+            // --------
+            // ENTERING
+            // --------
+
+            beforeEnter(el) {
+                // ...
+            },
+            // CSS と組み合わせて使う時、
+            // done コールバックはオプションです
+            enter(el, done) {
+                // JavaScript のみを利用したトランジションの場合は、enter と leave で done を呼ぶ必要がある
+                done()
+            },
+            afterEnter(el) {
+                // ...
+            },
+            enterCancelled(el) {
+                // ...
+            },
+
+            // --------
+            // LEAVING
+            // --------
+
+            beforeLeave(el) {
+                // ...
+            },
+            // CSS と組み合わせて使う時、
+            // done コールバックはオプションです
+            leave(el, done) {
+                // ...
+                done()
+            },
+            afterLeave(el) {
+                // ...
+            },
+            // v-show と共に使うときだけ leaveCancelled は有効です
+            leaveCancelled(el) {
+                // ...
+            }
+        }
+    }).mount('#demo4')
+
+    Vue.createApp({
+        data() {
+            return {
+                show: false
+            }
+        },
+        methods: {
+            beforeEnter(el) {
+                console.log(el);
+                gsap.set(el, {
+                    scaleX: 0.8,
+                    scaleY: 1.2
+                })
+            },
+            enter(el, done) {
+                gsap.to(el, {
+                    duration: 1,
+                    scaleX: 1.5,
+                    scaleY: 0.7,
+                    opacity: 1,
+                    x: 150,
+                    ease: 'elastic.inOut(2.5, 1)',
+                    onComplete: done
+                })
+            },
+            leave(el, done) {
+                gsap.to(el, {
+                    duration: 0.7,
+                    scaleX: 1,
+                    scaleY: 1,
+                    x: 300,
+                    ease: 'elastic.inOut(2.5, 1)'
+                })
+                gsap.to(el, {
+                    duration: 0.2,
+                    delay: 0.5,
+                    opacity: 0,
+                    onComplete: done
+                })
+            }
+        }
+    }).mount('#demo5')
+
+    Vue.createApp({
+        data() {
+            return {
+                on: false
+            }
+        }
+    }).mount('#demo6')
+
+</script>
+
+
+</body>
+</html>

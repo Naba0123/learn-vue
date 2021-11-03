@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+
+
+<!--
+アニメーション化した場合にどのプロパティが再描画をトリガーするか
+https://csstriggers.com/
+例えば transform は layout や paint を更新しないので、アニメーションに理想的
+-->
+
+<div id="app">
+    <div :class="{ shake: noActivated }">
+        <button @click="noActivated = true">Click me</button>
+        <span v-if="noActivated">Oh no!</span>
+    </div>
+
+    <div
+            :style="{ backgroundColor: `hsl(${x}, 80%, 50%)` }"
+            class="movearea"
+            @mousemove="xCoordinate"
+    >
+        <h3>Move your mouse across the screen...</h3>
+        <p>x: {{ x }}</p>
+    </div>
+
+</div>
+
+<style>
+    .shake {
+        animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        transform: translate3d(0, 0, 0);
+        backface-visibility: hidden;
+        perspective: 1000px;
+    }
+
+    @keyframes shake {
+        10%,
+        90% {
+            transform: translate3d(-1px, 0, 0);
+        }
+
+        20%,
+        80% {
+            transform: translate3d(2px, 0, 0);
+        }
+
+        30%,
+        50%,
+        70% {
+            transform: translate3d(-4px, 0, 0);
+        }
+
+        40%,
+        60% {
+            transform: translate3d(4px, 0, 0);
+        }
+    }
+
+    .movearea {
+        transition: 0.2s background-color ease;
+    }
+</style>
+
+<script lang="js">
+
+    const app = Vue.createApp({
+        data() {
+            return {
+                noActivated: false,
+                x: 0
+            }
+        },
+        methods: {
+            xCoordinate(e) {
+                this.x = e.clientX
+            }
+        }
+    })
+
+
+    app.mount('#app')
+
+</script>
+
+
+</body>
+</html>
