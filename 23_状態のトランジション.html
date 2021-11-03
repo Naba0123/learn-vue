@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+<script src="https://unpkg.com/lodash@4.17.20/lodash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.8.0/gsap.min.js"></script>
+
+<div id="animated-number-demo">
+    <!-- .number 修飾子をつけることで、ユーザーの入力を自動的に number へキャストする -->
+    <input v-model.number="number" step="20" type="number"/>
+    <p>{{ animatedNumber }}</p>
+</div>
+
+<br><br>
+
+<div id="demo">
+    <svg height="200" width="200">
+        <polygon :points="points"></polygon>
+        <circle cx="100" cy="100" r="90"></circle>
+    </svg>
+    <label>Sides: {{ sides }}</label>
+    <input v-model.number="sides" max="500" min="3" type="range"/>
+    <label>Minimum Radius: {{ minRadius }}%</label>
+    <input v-model.number="minRadius" max="90" min="0" type="range"/>
+    <label>Update Interval: {{ updateInterval }} milliseconds</label>
+    <input v-model.number="updateInterval" max="2000" min="10" type="range"/>
+</div>
+
+<br><br>
+
+<!-- 子コンポーネントでアニメーションを使う -->
+<div id="app">
+    <input v-model.number="firstNumber" step="20" type="number"/> +
+    <input v-model.number="secondNumber" step="20" type="number"/> = {{ result }}
+    <p>
+        <animated-integer :value="firstNumber"></animated-integer>
+        +
+        <animated-integer :value="secondNumber"></animated-integer>
+        =
+        <animated-integer :value="result"></animated-integer>
+    </p>
+</div>
+
+
+<style>
+    body {
+        margin: 30px;
+    }
+
+    svg {
+        display: block;
+    }
+
+    polygon {
+        fill: #41b883;
+    }
+
+    circle {
+        fill: transparent;
+        stroke: #35495e;
+    }
+
+    input[type="range"] {
+        display: block;
+        width: 100%;
+        margin-bottom: 15px;
+    }
+</style>
+
+<script lang="js">
+
+
+    Vue.createApp({
+        data() {
+            return {
+                number: 0,
+                tweenedNumber: 0
+            }
+        },
+        computed: {
+            animatedNumber() {
+                return this.tweenedNumber.toFixed(0)
+            }
+        },
+        watch: {
+            /* number が変更されるたびにここに来る */
+            number(newValue) {
+                gsap.to(this.$data, {duration: 0.5, tweenedNumber: newValue})
+            }
+        }
+    }).mount('#animated-number-demo')
+
+
+    const defaultSides = 10;
+    const stats = Array.apply(null, {length: defaultSides}).map(() => 100);
+
+    const Demo = {
+        data() {
+            return {
+                stats: stats,
+                points: generatePoints(stats),
+                sides: defaultSides,
+                minRadius: 50,
+                interval: null,
+                updateInterval: 500
+            };
+        },
+        watch: {
+            sides(newSides, oldSides) {
+                var sidesDifference = newSides - oldSides;
+                if (sidesDifference > 0) {
+                    for (var i = 1; i <= sidesDifference; i++) {
+                        this.stats.push(this.newRandomValue());
+                    }
+                } else {
+                    var absoluteSidesDifference = Math.abs(sidesDifference);
+                    for (var i = 1; i <= absoluteSidesDifference; i++) {
+                        this.stats.shift();
+                    }
+                }
+            },
+            stats(newStats) {
+                gsap.to(this.$data, this.updateInterval / 1000, {
+                    points: generatePoints(newStats)
+                });
+            },
+            updateInterval() {
+                this.resetInterval();
+            }
+        },
+        mounted() {
+            this.resetInterval();
+        },
+        methods: {
+            randomizeStats() {
+                var vm = this;
+                this.stats = this.stats.map(() => vm.newRandomValue());
+            },
+            newRandomValue() {
+                return Math.ceil(this.minRadius + Math.random() * (100 - this.minRadius));
+            },
+            resetInterval() {
+                var vm = this;
+                clearInterval(this.interval);
+                this.randomizeStats();
+                this.interval = setInterval(() => {
+                    vm.randomizeStats();
+                }, this.updateInterval);
+            }
+        }
+    };
+
+    Vue.createApp(Demo).mount("#demo");
+
+    function valueToPoint(value, index, total) {
+        var x = 0;
+        var y = -value * 0.9;
+        var angle = ((Math.PI * 2) / total) * index;
+        var cos = Math.cos(angle);
+        var sin = Math.sin(angle);
+        var tx = x * cos - y * sin + 100;
+        var ty = x * sin + y * cos + 100;
+        return {x: tx, y: ty};
+    }
+
+    function generatePoints(stats) {
+        var total = stats.length;
+        return stats
+            .map(function (stat, index) {
+                var point = valueToPoint(stat, index, total);
+                return point.x + "," + point.y;
+            })
+            .join(" ");
+    }
+
+
+    const app = Vue.createApp({
+        data() {
+            return {
+                firstNumber: 20,
+                secondNumber: 40
+            }
+        },
+        computed: {
+            result() {
+                return this.firstNumber + this.secondNumber
+            }
+        }
+    })
+
+    app.component('animated-integer', {
+        template: '<span>{{ fullValue }}</span>',
+        props: {
+            value: {
+                type: Number,
+                required: true
+            }
+        },
+        data() {
+            return {
+                tweeningValue: 0
+            }
+        },
+        computed: {
+            fullValue() {
+                return Math.floor(this.tweeningValue)
+            }
+        },
+        methods: {
+            tween(newValue, oldValue) {
+                gsap.to(this.$data, {
+                    duration: 0.5,
+                    tweeningValue: newValue,
+                    ease: 'sine'
+                })
+            }
+        },
+        watch: {
+            value(newValue, oldValue) {
+                this.tween(newValue, oldValue)
+            }
+        },
+        mounted() {
+            this.tween(this.value, 0)
+        }
+    })
+
+    app.mount('#app')
+
+</script>
+
+
+</body>
+</html>
