@@ -1,0 +1,22 @@
+{
+  "name": "learn-vue",
+  "version": "1.0.0",
+  "description": "https://v3.ja.vuejs.org/guide",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Naba0123/learn-vue.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Naba0123/learn-vue/issues"
+  },
+  "homepage": "https://github.com/Naba0123/learn-vue#readme",
+  "dependencies": {
+    "vue": "^2.6.14"
+  }
+}
