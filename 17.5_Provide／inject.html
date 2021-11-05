@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+
+
+<script lang="js">
+
+    const app = Vue.createApp({})
+
+    app.component('todo-list', {
+        data() {
+            return {
+                todos: ['Feed a cat', 'Buy tickets']
+            }
+        },
+        // provide を使うことで、子コンポーネントに値を渡せる
+        /*
+        provide: {
+            user: 'John Doe',  // 固定値の場合はこれでOK
+        },
+         */
+        // プリミティブではなくインスタンスプロパティにアクセスするためには
+        // provide をオブジェクトを返す関数にする必要がある
+        provide() {
+            return {
+                // Vue.computed で囲うことでリアクティブになる
+                todoLength: Vue.computed(() => this.todos.length)
+            }
+        },
+        template: `
+          <div>
+          {{ todos.length }}
+          <!-- rest of the template -->
+          </div>
+        `
+    })
+
+    app.component('todo-list-statistics', {
+        // 親コンポーネントから受け渡される
+        inject: ['user'],
+        created() {
+            console.log(`Injected property: ${this.user}`) // > Injected property: John Doe
+        }
+    })
+
+</script>
+
+
+</body>
+</html>
