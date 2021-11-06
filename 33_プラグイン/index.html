@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+<script src="https://unpkg.com/lodash@4.17.20/lodash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.8.0/gsap.min.js"></script>
+
+<div id="app">
+
+</div>
+
+<style>
+
+</style>
+
+<script lang="js">
+
+    // import { createApp } from 'vue'
+    import i18nPlugin from './i18n'
+
+    const app = Vue.createApp({})
+    const i18nStrings = {
+        greetings: {
+            hi: 'Hallo!'
+        }
+    }
+
+    app.use(i18nPlugin, i18nStrings)
+    app.mount('#app')
+
+</script>
