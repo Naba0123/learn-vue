@@ -15,8 +15,5 @@
   "bugs": {
     "url": "https://github.com/Naba0123/learn-vue/issues"
   },
-  "homepage": "https://github.com/Naba0123/learn-vue#readme",
-  "dependencies": {
-    "vue": "^2.6.14"
-  }
+  "homepage": "https://github.com/Naba0123/learn-vue#readme"
 }
