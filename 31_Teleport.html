@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+<script src="https://unpkg.com/lodash@4.17.20/lodash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.8.0/gsap.min.js"></script>
+
+<div id="app" style="position: relative;">
+    <h3>Tooltips with Vue 3 Teleport</h3>
+    <div>
+        <modal-button></modal-button>
+    </div>
+</div>
+
+<style>
+
+</style>
+
+<script lang="js">
+
+    const app = Vue.createApp({});
+
+    app.component('modal-button', {
+        template: `
+          <button @click="modalOpen = true">
+          Open full screen modal!
+          </button>
+
+          <!-- teleport を使うことで、特定の要素に移動できる -->
+          <teleport to="body">
+          <div v-if="modalOpen" class="modal">
+            <div>
+              I'm a teleported modal!
+              (My parent is "body")
+              <button @click="modalOpen = false">
+                Close
+              </button>
+            </div>
+          </div>
+          </teleport>
+        `,
+        data() {
+            return {
+                modalOpen: true
+            }
+        }
+    }).mount('#app')
+
+
+    const app2 = Vue.createApp({
+        template: `
+    <h1>Root instance</h1>
+    <parent-component />
+  `
+    })
+
+    app2.component('parent-component', {
+        template: `
+    <h2>This is a parent component</h2>
+    <!-- 子コンポーネントが別の場所に配置されたとしても、ちゃんと構造は残っているので、name="John"は渡される -->
+    <teleport to="#endofbody">
+      <child-component name="John" />
+    </teleport>
+    <!-- 同じ to に複数投げてもOK -->
+    <teleport to="#endofbody">
+      <child-component name="John" />
+    </teleport>
+  `
+    })
+
+    app2.component('child-component', {
+        props: ['name'],
+        template: `
+          <div>Hello, {{ name }}</div>
+        `
+    })
+
+</script>
+
+
+</body>
+</html>
