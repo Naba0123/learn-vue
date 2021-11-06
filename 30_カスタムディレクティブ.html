@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+<script src="https://unpkg.com/lodash@4.17.20/lodash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.8.0/gsap.min.js"></script>
+
+
+<div id="simplest-directive-example" class="demo">
+    <!-- カスタムディレクティブ -->
+    <input v-focus/>
+</div>
+
+<div id="dynamic-arguments-example" class="demo">
+    <p>Scroll down the page</p>
+    <input v-model="pinPadding" max="500" min="0" type="range">
+    <p v-pin:[direction]="pinPadding">Stick me {{ pinPadding + 'px' }} from the {{ direction || 'top' }} of the page</p>
+
+    <!-- 値にはあらゆる妥当な JavaScript 式を渡すことができる -->
+    <div v-demo="{ color: 'white', text: 'hello!' }"></div>
+
+    <!-- コンポーネントに使われた場合、コンポーネントのルートノードに適用される -->
+    <!-- ディレクティブは v-bind:"$attrs" で別の要素にわたすことはできない（data-hoge 系をtemplate配下に渡す、など） -->
+    <my-component v-demo="{ color: 'white', text: 'hello!' }"></my-component>
+</div>
+
+
+<style>
+
+</style>
+
+<script lang="js">
+
+
+    const app = Vue.createApp({
+        // ローカルカスタムディレクティブ
+        directives: {
+            // focus: {
+            //     mounted(el) {
+            //         el.focus()
+            //     }
+            // }
+        }
+    });
+
+    // グローバルカスタムディレクティブ
+    app.directive('focus', {
+        // 束縛されている要素が DOM にマウントされると
+        mounted(el) {
+            // その要素にフォーカスを当てる
+            el.focus()
+        }
+    })
+
+    app.mount('#simplest-directive-example')
+
+
+    // 動的ディレクティブ変数
+    const app2 = Vue.createApp({
+        data() {
+            return {
+                direction: 'right',
+                pinPadding: 200,
+            }
+        }
+    })
+
+    app2.directive('pin', {
+        mounted(el, binding) {
+            el.style.position = 'fixed'
+
+            // binding.arg がディレクティブに渡した引数です
+            const s = binding.arg || 'top'
+            console.log(s)  // right
+
+            // binding.value はディレクティブに渡した値です - このケースの場合、200 です
+            el.style[s] = binding.value + 'px'
+        },
+        updated(el, binding) {
+            const s = binding.arg || 'top'
+            el.style[s] = binding.value + 'px'
+        },
+    })
+
+    // mounted と updated 以外は使わない場合、関数で省略して記載できる
+    app2.directive('short-pin', (el, binding) => {
+        el.style.position = 'fixed'
+        const s = binding.arg || 'top'
+        el.style[s] = binding.value + 'px'
+    })
+
+    app2.directive('demo', (el, binding) => {
+        console.log(binding.value.color) // => "white"
+        console.log(binding.value.text) // => "hello!"
+    })
+
+    app2.component('my-component', {
+        template: `
+            <div> <!-- v-demo ディレクティブはここで適用される -->
+              <span>My component content</span>
+            </div>
+          `
+    })
+
+    app2.mount('#dynamic-arguments-example')
+
+</script>
+
+
+</body>
+</html>
