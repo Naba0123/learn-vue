@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+<script src="https://unpkg.com/lodash@4.17.20/lodash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.8.0/gsap.min.js"></script>
+
+<div id="app">
+
+</div>
+
+<style>
+
+</style>
+
+<script lang="js">
+
+    // プロキシ
+    const dinner = {
+        meal: 'tacos'
+    }
+
+    // ハンドラ関数、別名トラップ
+    const handler = {
+        get(target, property) {
+            // console.log('intercepted!')
+            // return target[property]
+
+            // プロパティが読み込まれた時に追跡する
+            // どの作用が現在実行されているのかをチェックして、 target と property を一緒に記録します。
+            track(target, property)
+
+            // this の束縛
+            // どのメソッドでも対象のオブジェクトではなく、プロキシに束縛されるようにする
+            const value = Reflect.get(...arguments)  // ES6 の書き方（Reflect
+            if (isObject(value)) {
+                // ネストしたオブジェクトを独自のリアクティブプロキシでラップする
+                return reactive(value)
+            } else {
+                return value
+            }
+        },
+        // プロパティの値が変わったら、作用を再度実行する
+        set(target, property, value, receiver) {
+            // 最初に値を読み込んだコードを再実行する
+            // trigger 関数によって、どの作用がプロパティに依存しているか調べ、それらを実行します。
+            trigger(target, property)
+            return Reflect.set(...arguments)
+        }
+    }
+
+    // プロキシ：そのオブジェクトの基本的な操作を傍受したり再定義したりすることができる
+    // https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Proxy
+    // dinner: プロキシを設定する元のオブジェクト
+    // handler: どの操作を傍受するか、また傍受された操作をどのように再定義するかを定義するオブジェクト
+    const proxy = new Proxy(dinner, handler)
+    console.log(proxy.meal)
+
+    // intercepted!
+    // tacos
+
+
+    const vm = createApp({
+        // data() が返す関数はリアクティブプロキシでラップされ、this.$data に保存される。
+        // this.$data.val1 など
+        data() {
+            return {
+                val1: 2,
+                val2: 3
+            }
+        },
+        computed: {
+            // Vue は sum を作用でラップする。
+            sum() {
+                return this.val1 + this.val2
+            }
+        }
+    }).mount('#app')
+
+    console.log(vm.sum) // 5
+
+    vm.val1 = 3
+
+    console.log(vm.sum) // 6
+
+    // 手動リアクティブプロキシ
+    const proxy2 = reactive({
+        val1: 2,
+        val2: 3
+    })
+
+
+    // プロキシを返すと、オブジェクトの同一性比較はできなくなる
+    const obj = {}
+    const wrapped = new Proxy(obj, handlers)
+    console.log(obj === wrapped) // false
+
+    // プロキシの中身のプリミティブはラップしないので同一性比較が可能
+    const obj2 = reactive({
+        count: 0
+    })
+    console.log(obj2.count === 0) // true
+
+    // render についても、 computed と同様、
+    // いずれかのプロパティに変更があると、作用の再実行が発火され render が再実行され、新しい VNode 生成される
+
+</script>
+
+
+</body>
+</html>
