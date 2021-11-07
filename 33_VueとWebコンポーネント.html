@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+<script src="https://unpkg.com/lodash@4.17.20/lodash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.8.0/gsap.min.js"></script>
+
+<div id="app">
+    <!-- DOMプロパティの渡し方の強制。.propをつけることでv-bindを確実なものにする -->
+    <my-element :user.prop="{ name: 'jack' }"></my-element>
+    <!-- 省略同等 -->
+    <my-element .user="{ name: 'jack' }"></my-element>
+
+    <my-vue-element></my-vue-element>
+</div>
+
+<style>
+
+</style>
+
+<script lang="js">
+
+    // https://nulab.com/ja/blog/cacoo/web-components/
+    // WebComponents をテンプレート内で使うとき
+    // カスタム要素をレンダリングするためにフォールバックする前に、
+    // ネイティブではないHTMLタグをVueコンポーネントとして解決しようとしてエラーが出る
+    // これを防ぐためにすること
+    // https://t28.dev/tip-use-web-components-in-vue/
+
+
+    // ブラウザ内設定
+    const app = Vue.createApp({})
+    app.config.compilerOptions.isCustomElement = tag => tag.includes('-')
+
+
+    // Vite 設定
+    import vue from '@vitejs/plugin-vue'  // // vite.config.js
+    export default {
+        plugins: [
+            vue({
+                template: {
+                    compilerOptions: {
+                        // ダッシュを含むすべてのタグをカスタム要素として扱う
+                        isCustomElement: tag => tag.includes('-')
+                    }
+                }
+            })
+        ]
+    }
+
+    // Vue CLI
+    // vue.config.js
+    module.exports = {
+        chainWebpack: config => {
+            config.module
+                .rule('vue')
+                .use('vue-loader')
+                .tap(options => ({
+                    ...options,
+                    compilerOptions: {
+                        // ion- で始まるタグはすべてカスタム要素として扱う
+                        isCustomElement: tag => tag.startsWith('ion-')
+                    }
+                }))
+        }
+    }
+
+
+    // Webコンポーネントのカスタム要素のビルド
+    import {defineCustomElement} from 'vue'
+
+    // HTMLElement を拡張したカスタム要素が返される
+    const MyVueElement = defineCustomElement({
+        // 通常の Vue コンポーネントオプションはここに
+        props: {},
+        emits: {},
+        template: `...`,
+
+        // defineCustomElement のみ: shadow root に注入される CSS
+        styles: [`/* inlined css */`]
+    })
+
+    // カスタム要素の登録。
+    // 登録後、ページ上の全ての `<my-vue-element>` タグがアップグレードされます。
+    //
+    customElements.define('my-vue-element', MyVueElement)
+
+    // プログラマチックに要素をインスタンス化することもできます:
+    // (登録後にのみ行うことができます)
+    document.body.appendChild(
+        new MyVueElement({
+            // 初期化 props (任意)
+        })
+    )
+
+    // TODO: つづきはWebコンポーネントを学んでから
+
+</script>
+
+
+</body>
+</html>
