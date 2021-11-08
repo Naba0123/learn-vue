@@ -1,0 +1,61 @@
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+
+<div id="app-a">{{ sharedState.message }}</div>
+
+<div id="app-b">{{ sharedState.message }}</div>
+
+
+<script>
+
+    const {createApp, reactive} = Vue
+
+
+    // Store パターン
+    // 値の状態管理は全てアプリの外で管理する
+    const store = {
+        debug: true,
+
+        state: reactive({
+            message: 'Hello!'
+        }),
+
+        // ここで値の変更は一元管理できる
+        setMessageAction(newValue) {
+            if (this.debug) {
+                console.log('setMessageAction triggered with', newValue)
+            }
+
+            this.state.message = newValue
+        },
+
+        clearMessageAction() {
+            if (this.debug) {
+                console.log('clearMessageAction triggered')
+            }
+
+            this.state.message = ''
+        }
+    }
+
+    const appA = createApp({
+        data() {
+            return {
+                privateState: {},
+                sharedState: store.state
+            }
+        },
+        mounted() {
+            store.setMessageAction('Goodbye!')
+        }
+    }).mount('#app-a')
+
+    const appB = createApp({
+        data() {
+            return {
+                privateState: {},
+                sharedState: store.state
+            }
+        }
+    }).mount('#app-b')
+
+</script>
