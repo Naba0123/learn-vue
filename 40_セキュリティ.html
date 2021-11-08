@@ -1,0 +1,53 @@
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+
+<div id="app">
+    <!-- html 展開（脆弱性に注意） -->
+    <div v-html="userProvidedHtml"></div>
+    <html-content :html="userProvidedHtml"></html-content>
+
+    <!-- このままでは危ない。sanitize-url のようなライブラリが使える -->
+    <!-- https://www.npmjs.com/package/@braintree/sanitize-url -->
+    <a :href="userProvidedUrl">
+        click me
+    </a>
+
+    <!-- このままでは危ない。クリックジャックをされてしまう可能性がある -->
+    <button :style="userProvidedStyles"></button>
+    <!-- オブジェクト構文を使うのが良い -->
+    <button :style="{
+        color: userProvidedColor,
+        background: userProvidedBackground
+    }">click me
+    </button>
+
+    <!-- onclick, onfocus, onmouseenter などにユーザー提供 JavaScript を埋め込むのは危険 -->　
+
+</div>
+
+
+<script>
+
+    Vue.createApp({
+        data() {
+            return {
+                userProvidedHtml: '<h1>aaa!</h1>',
+                userProvidedUrl: 'https://google.com/',
+            }
+        }
+    })
+        .component('html-content', {
+            props: {
+                html: String
+            },
+            render() {
+                return Vue.h('div', {
+                    innerHTML: this.html
+                })
+            }
+
+            // jsx
+            // <div innerHTML={this.userProvidedHtml}></div>
+        })
+        .mount('#app')
+
+</script>
