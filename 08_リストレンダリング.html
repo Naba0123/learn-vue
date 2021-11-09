@@ -45,7 +45,13 @@
     </li>
 </template>
 
-<!-- todo: https://v3.ja.vuejs.org/guide/list.html#%E3%82%B3%E3%83%B3%E3%83%9B%E3%82%9A%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88%E3%81%A8-v-for -->
+<!-- component での v-for は、自動で item は渡されないので、:item="item" などで渡す必要がある -->
+<my-component
+        v-for="(item, index) in items"
+        :key="item.id"
+        :index="index"
+        :item="item"
+></my-component>
 
 
 <script lang="js">

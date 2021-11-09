@@ -1,0 +1,28 @@
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+
+<div id="app">
+    <ul>
+        <li>
+            <a ref="skipLink" href="#main">Skip to main content</a>
+        </li>
+    </ul>
+</div>
+
+<!-- ランドマーク -->
+<!-- https://developer.mozilla.org/ja/docs/Web/Accessibility/ARIA/Roles -->
+
+
+<script>
+
+    Vue.createApp({
+        watch: {
+            $route() {
+                // ref で skipLink に束縛している
+                this.$refs.skipLink.focus();
+            }
+        }
+    })
+
+        .mount('#app')
+
+</script>
