@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+
+<div id="app">
+    <ul>
+        <!-- v-for には :key をつける -->
+        <template v-for="user in users" :key="user.id">
+            <!-- v-for と v-if は同時には使わない。v-for よりも v-if の方が優先度が高いため -->
+            <!-- 今回の場合だと、算出プロパティを使って v-for="user in activeUsers" という書き方でもOK -->
+            <li v-if="user.isActive">
+                {{ user.name }}
+            </li>
+        </template>
+    </ul>
+
+    <!-- <my-component/> のような自己終了形式は、DOMテンプレートの中では使えない（HTMLの解析が先に始まってしまうので） -->
+    <!-- 単一ファイルコンポーネント、文字列テンプレート、JSXでは使える <MyComponent/> -->
+    <!-- プロパティ名は、テンプレート側ではケバブケースにする -->
+    <!-- 複数プロパティは、改行する -->
+    <my-component
+            greeting-text="hi"
+            hoge-fuga="foo-bar"
+    ></my-component>
+
+    <!-- 複雑な式は算出プロパティかメソッドにする -->
+    <template>
+        {{ normalizedFullName }}
+        {{ finalPrice }}
+    </template>
+
+    <!-- 属性は必ず引用符付きで指定する（読みづらいので） -->
+    <template :style="{ width: sidebarWidth + 'px' }"></template>
+
+    <!-- 省略形は使うか使わないかどっちかに統一する -->
+    <template
+            #header
+            :value="value"
+            @input="onInput"
+    ></template>
+
+    <!-- 属性の順序は、いつも同じ定義順になるべき -->
+    <!-- https://v3.ja.vuejs.org/style-guide/#%E8%A6%81%E7%B4%A0%E3%81%AE%E5%B1%9E%E6%80%A7%E3%81%AE%E9%A0%86%E5%BA%8F-%E6%8E%A8%E5%A5%A8 -->
+</div>
+
+<script lang="js">
+
+    const app = Vue.createApp({})
+
+    // コンポーネント名は複数名
+    app.component('todo-item', {
+        // コンポーネント内のオプションは、いつも同じ順序で定義されるべき
+        // https://v3.ja.vuejs.org/style-guide/#%E3%82%B3%E3%83%B3%E3%83%9B%E3%82%9A%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88-%E3%82%A4%E3%83%B3%E3%82%B9%E3%82%BF%E3%83%B3%E3%82%B9-%E3%82%AA%E3%83%95%E3%82%9A%E3%82%B7%E3%83%A7%E3%83%B3%E9%A0%86%E5%BA%8F-%E6%8E%A8%E5%A5%A8
+
+        // props は省略形 props: ['hoge'] を使わず、具体的に書く
+        props: {
+            status: {
+                type: String,
+                required: true,
+
+                validator: value => {
+                    return [
+                        'syncing',
+                        'synced',
+                        'version-conflict',
+                        'error'
+                    ].includes(value)
+                }
+            },
+            // キャメルケースにする
+            greetingText: string
+        },
+        computed: {
+            normalizedFullName() {
+                return this.fullName.split(' ')
+                    .map(word => word[0].toUpperCase() + word.slice(1))
+                    .join(' ')
+            },
+            // 複雑な式は、なるべく単純な式に分割する
+            basePrice() {
+                return this.manufactureCost / (1 - this.profitMargin)
+            },
+            discount() {
+                return this.basePrice * (this.discountPercent || 0)
+            },
+            finalPrice() {
+                return this.basePrice - this.discount
+            }
+        }
+    })
+
+    // このようにコンポーネントを1ファイルにかかない。複数ファイルに分ける（ビルドツールがある場合）
+    app.component('TodoList', {
+        // ...
+    })
+
+    app.component('TodoItem', {
+        // ...
+    })
+
+    // 親と子を密接に紐付けない
+    app.component('TodoItem', {
+        props: {
+            todo: {
+                type: Object,
+                required: true
+            }
+        },
+
+        // プロパティとイベントを使って基本的にはやり取りをする
+        template: `
+          <input
+            :value="todo.text"
+            @input="$emit('input', $event.target.value)"
+          >
+          <button @click="$emit('delete')">×</button>
+        `,
+
+        // これは紐付き過ぎている例 v-model, @click など
+        // template: '<input v-model="todo.text"><button @click="removeTodo">×</button>'
+    })
+
+    /**
+     * コンポーネント命名規則
+     * components/
+     * |
+     * | コンポーネント名は、パスカルケース（アッパーキャメル）かケバブケースで書く
+     * |- my-component.vue
+     * |- MyComponent.vue
+     * |
+     * | 基底コンポーネントは固有のプレフィックスをつける
+     * |- BaseButton.vue
+     * |- AppButton.vue
+     * |- VButton.vue
+     * |
+     * | 単一インスタンスコンポーネント（常に1つのインスタンスしか持たないコンポーネント）はTheをつける
+     * |- TheHeading.vue
+     * |- TheSidebar.vue
+     * |
+     * | 親コンポーネントと密結合しているコンポーネントは、親の名前をプレフィックスに使う
+     * |- SearchSidebar.vue
+     * |- SearchSidebarNavigation.vue
+     * |
+     * | コンポーネント名は、一般的な単語→説明単語で終わらせる
+     * |- ClearSearchButton.vue  悪い例
+     * |- SearchButtonClear.vue  良い例
+     * |
+     * | コンポーネント名は略語よりも完全な単語を使う
+     * |- SdSettings.vue  悪い例（Sdって何？）
+     * |- StudentDashboardSettings.vue  良い例
+     * |
+     * |
+     *
+     */
+
+</script>
+
+</body>
+</html>
+<script>
+    import MyComponent from "./コンポーネント名の形式";
+
+    export default {
+        components: {MyComponent}
+    }
+</script>
